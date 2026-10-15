@@ -68,7 +68,8 @@ def validate_field(value, min, max):
         return
 
     i = int(value)
-    return min <= i <= max
+    if not min <= i <= max:
+        raise ValueError(f"Cron field {value} outside {min}..{max}")
 
 
 def strip_quotes(value: str):
