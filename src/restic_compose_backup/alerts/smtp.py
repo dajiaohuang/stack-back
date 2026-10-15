@@ -48,22 +48,23 @@ class SMTPAlert(BaseAlert):
                 server = smtplib.SMTP_SSL(self.host, self.port)
             else:
                 server = smtplib.SMTP(self.host, self.port)
-            if self.port == "587":
-                try:
-                    server.starttls()
-                except smtplib.SMTPHeloError:
-                    logger.error(
-                        "The server didn't reply properly to the HELO greeting. Email not sent."
-                    )
-                    return
-                except smtplib.SMTPNotSupportedError:
-                    logger.error("STARTTLS not supported on server. Email not sent.")
-                    return
-            server.ehlo()
-            server.login(self.user, self.password)
-            server.sendmail(self.user, self.to, msg.as_string())
-            logger.info("Email sent")
+            try:
+                if self.port == "587":
+                    try:
+                        server.starttls()
+                    except smtplib.SMTPHeloError:
+                        logger.error(
+                            "The server didn't reply properly to the HELO greeting. Email not sent."
+                        )
+                        return
+                    except smtplib.SMTPNotSupportedError:
+                        logger.error("STARTTLS not supported on server. Email not sent.")
+                        return
+                server.ehlo()
+                server.login(self.user, self.password)
+                server.sendmail(self.user, self.to, msg.as_string())
+                logger.info("Email sent")
+            finally:
+                server.close()
         except Exception as ex:
             logger.exception(ex)
-        finally:
-            server.close()
